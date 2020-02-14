@@ -20,28 +20,36 @@ const App = () => {
     event.preventDefault();
     const numberObject = {
       name: newName,
-      number: newNumber,
-      id: persons.length + 1,
-      important: Math.random() > 0.5
+      number: newNumber
     };
-    setErrorMessage(`Person ${numberObject.name} was added`);
-    setTimeout(() => {
-      setErrorMessage(null);
-    }, 5000);
+    const oneName = newName;
+
+    const personList = persons.filter(per => oneName === per.name);
+
+    if (personList.length !== 0) {
+      const id = personList[0].id;
+      if (window.confirm("Name is already in the list")) {
+        personService.update(id, numberObject).then(returnedPerson => {
+          setPersons(
+            persons.map(person =>
+              person.id !== id ? person : returnedPerson.data
+            )
+          );
+        });
+      }
+      return setPersons(persons.concat(numberObject));
+    }
 
     personService.create(numberObject).then(initialPersons => {
       setPersons(persons.concat(initialPersons));
       setNewName("");
       setNewNumber("");
       setSearch("");
+      setErrorMessage(`Person ${numberObject.name} was added`);
+      setTimeout(() => {
+        setErrorMessage(null);
+      }, 5000);
     });
-
-    const oneName = newName;
-    const list = persons.map(x => x.name);
-
-    if (list.includes(oneName)) {
-      return alert("Name is already in the list");
-    }
     return setPersons(persons.concat(numberObject));
   };
 
